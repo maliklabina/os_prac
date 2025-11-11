@@ -1,0 +1,83 @@
+#include <stdio.h>
+
+int main() {
+    int pages[30], frame[10];
+    int n, f, i, j, k, pos, page_fault = 0, farthest;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter page numbers: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
+
+    printf("Enter number of frames (min 3): ");
+    scanf("%d", &f);
+
+    for (i = 0; i < f; i++)
+        frame[i] = -1;
+
+    printf("\nPage\tFrames\n");
+
+    for (i = 0; i < n; i++) {
+        int found = 0;
+
+        // Check if page is already present
+        for (j = 0; j < f; j++) {
+            if (frame[j] == pages[i]) {
+                found = 1;
+                break;
+            }
+        }
+
+        // If not found → page fault
+        if (!found) {
+            // If there is empty frame, use it
+            int empty = -1;
+            for (j = 0; j < f; j++) {
+                if (frame[j] == -1) {
+                    empty = j;
+                    break;
+                }
+            }
+
+            if (empty != -1)
+                pos = empty;
+            else {
+                // Find page that will not be used for longest time (Optimal)
+                farthest = -1;
+                pos = -1;
+                for (j = 0; j < f; j++) {
+                    int next_use = -1;
+                    for (k = i + 1; k < n; k++) {
+                        if (frame[j] == pages[k]) {
+                            next_use = k;
+                            break;
+                        }
+                    }
+                    if (next_use == -1) {
+                        pos = j;
+                        break;
+                    }
+                    if (next_use > farthest) {
+                        farthest = next_use;
+                        pos = j;
+                    }
+                }
+            }
+
+            frame[pos] = pages[i];
+            page_fault++;
+        }
+
+        // Display current frames
+        printf("%d\t", pages[i]);
+        for (j = 0; j < f; j++)
+            if (frame[j] != -1) printf("%d ", frame[j]);
+            else printf("- ");
+        printf("\n");
+    }
+
+    printf("\nTotal Page Faults = %d\n", page_fault);
+    return 0;
+}
